@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App - Test Your Knowledge</title>
+    <link rel="stylesheet" href="dist/output.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-4xl">
+        
+        <!-- Domain Selection Screen -->
+        <div id="domain-screen" class="animate-fade-in">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-pixel font-bold mb-4 text-text">Choose Your Domain</h1>
+                <p class="text-muted text-lg">Select a category to test your knowledge</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Full Stack -->
+                <div class="domain-card" onclick="selectDomain('fullstack')">
+                    <div class="text-4xl mb-4">💻</div>
+                    <h3 class="text-xl font-semibold text-text mb-2">Full Stack</h3>
+                    <p class="text-muted text-sm">Frontend, Backend & Database</p>
+                </div>
+                
+                <!-- Game Dev -->
+                <div class="domain-card" onclick="selectDomain('gamedev')">
+                    <div class="text-4xl mb-4">🎮</div>
+                    <h3 class="text-xl font-semibold text-text mb-2">Game Dev</h3>
+                    <p class="text-muted text-sm">Unity, Unreal & Game Design</p>
+                </div>
+                
+                <!-- UI/UX -->
+                <div class="domain-card" onclick="selectDomain('uiux')">
+                    <div class="text-4xl mb-4">🎨</div>
+                    <h3 class="text-xl font-semibold text-text mb-2">UI/UX Design</h3>
+                    <p class="text-muted text-sm">Design Principles & Tools</p>
+                </div>
+                
+                <!-- Ethical Hacking -->
+                <div class="domain-card" onclick="selectDomain('hacking')">
+                    <div class="text-4xl mb-4">🛡️</div>
+                    <h3 class="text-xl font-semibold text-text mb-2">Ethical Hacking</h3>
+                    <p class="text-muted text-sm">Security & Penetration Testing</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden animate-slide-up">
+            <!-- Top Bar -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-4">
+                    <span id="domain-badge" class="bg-accent/20 text-accent px-4 py-2 rounded border-2 border-border text-sm font-medium"></span>
+                    <span class="text-muted">Question <span id="current-question">1</span>/10</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-12 h-12 rounded border-4 border-border flex items-center justify-center bg-white shadow-retro-sm">
+                        <span id="timer" class="text-accent font-bold text-lg">15</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-300 rounded h-4 mb-8 border-4 border-border">
+                <div id="progress-bar" class="bg-accent h-full transition-all duration-300" style="width: 10%"></div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="card p-8 mb-6">
+                <h2 id="question-text" class="text-xl font-semibold text-text mb-2"></h2>
+                <p id="difficulty-badge" class="text-sm text-muted mb-4"></p>
+            </div>
+
+            <!-- Options -->
+            <div id="options-container" class="space-y-4">
+                <!-- Options will be dynamically inserted here -->
+            </div>
+
+            <!-- Score Display -->
+            <div class="mt-6 text-center">
+                <p class="text-muted text-lg">Score: <span id="current-score" class="text-accent font-bold text-xl">0</span></p>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden animate-scale-in">
+            <div class="card p-8 text-center">
+                <div class="text-6xl mb-6">🏆</div>
+                <h2 class="text-3xl font-pixel font-bold text-text mb-2">Quiz Complete!</h2>
+                <p id="result-domain" class="text-muted mb-6"></p>
+                
+                <div class="bg-white border-4 border-border shadow-retro-sm rounded p-6 mb-6">
+                    <div class="text-5xl font-pixel font-bold text-accent mb-2">
+                        <span id="final-score">0</span>/10
+                    </div>
+                    <p id="performance-text" class="text-xl text-text font-semibold"></p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-white border-4 border-border shadow-retro-sm rounded p-4">
+                        <p class="text-muted text-sm">Correct</p>
+                        <p id="correct-count" class="text-2xl font-bold text-success">0</p>
+                    </div>
+                    <div class="bg-white border-4 border-border shadow-retro-sm rounded p-4">
+                        <p class="text-muted text-sm">Wrong</p>
+                        <p id="wrong-count" class="text-2xl font-bold text-error">0</p>
+                    </div>
+                </div>
+
+                <div class="bg-white border-4 border-border shadow-retro-sm rounded p-4 mb-6">
+                    <p class="text-muted text-sm">High Score</p>
+                    <p id="high-score" class="text-2xl font-bold text-accent">0</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="restartQuiz()" class="btn-primary">
+                        🔄 Restart Quiz
+                    </button>
+                    <button onclick="changeDomain()" class="btn-secondary">
+                        📂 Change Domain
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
