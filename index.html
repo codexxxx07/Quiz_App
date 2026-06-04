@@ -211,6 +211,11 @@
         </div>
     </div>
 
+    <!-- ══ FOOTER ══ -->
+    <footer id="site-footer">
+        <span id="footer-text">© 2026 Krish&nbsp; | &nbsp;Built with ❤️ and Code&nbsp; | &nbsp;All Rights Reserved</span>
+    </footer>
+
     <!-- Retro "Time's Up!" Overlay -->
     <div id="timesup-overlay" class="hidden" aria-live="assertive" role="alert">
         <div id="timesup-card">
@@ -775,6 +780,57 @@
             0%   { opacity: 1; }
             50%  { opacity: 0.35; }
             100% { opacity: 1; }
+        }
+
+        /* ══════════════════════════════
+           FOOTER
+        ══════════════════════════════ */
+        #site-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+
+            /* Light mode */
+            background-color: #e5e5e5;
+            border-top: 2px solid #1a1a1a;
+
+            padding: 10px 16px;
+            text-align: center;
+        }
+
+        #footer-text {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.45rem;
+            color: #1a1a1a;
+            letter-spacing: 1.5px;
+            display: inline-block;
+            transition: color 0.2s ease;
+        }
+
+        /* Subtle hover effect */
+        #site-footer:hover #footer-text {
+            color: #555;
+        }
+
+        /* Dark mode overrides */
+        [data-theme="dark"] #site-footer {
+            background-color: #374151;
+            border-top-color: #4b5563;
+        }
+
+        [data-theme="dark"] #footer-text {
+            color: #9ca3af;
+        }
+
+        [data-theme="dark"] #site-footer:hover #footer-text {
+            color: #d1d5db;
+        }
+
+        /* Push page content above the fixed footer */
+        body {
+            padding-bottom: 48px !important;
         }
     </style>
 
