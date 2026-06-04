@@ -1,5 +1,11 @@
-// Quiz Questions Data
-const quizData = {
+// ══════════════════════════════════════════
+//  SECURITY: IIFE to prevent global scope pollution
+// ══════════════════════════════════════════
+(function() {
+    'use strict';
+
+    // Quiz Questions Data
+    const quizData = {
     fullstack: [
         {
             question: "What does REST stand for in RESTful APIs?",
@@ -272,11 +278,43 @@ function shuffleArray(arr) {
     return copy;
 }
 
-// DOM Elements
-const domainScreen = document.getElementById('domain-screen');
-const quizScreen = document.getElementById('quiz-screen');
-const resultScreen = document.getElementById('result-screen');
-const rulebookScreen = document.getElementById('rulebook-screen');
+// ══════════════════════════════════════════
+//  PERFORMANCE & SECURITY: Cache DOM elements
+//  and add null checks for safe access
+// ══════════════════════════════════════════
+
+// Helper function to safely get DOM element
+function safeGetElement(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        console.error(`Element with id "${id}" not found`);
+        return null;
+    }
+    return element;
+}
+
+// Cached DOM Elements
+const domainScreen = safeGetElement('domain-screen');
+const quizScreen = safeGetElement('quiz-screen');
+const resultScreen = safeGetElement('result-screen');
+const rulebookScreen = safeGetElement('rulebook-screen');
+const rulebookDomainTag = safeGetElement('rulebook-domain-tag');
+const domainBadge = safeGetElement('domain-badge');
+const currentQuestionEl = safeGetElement('current-question');
+const questionText = safeGetElement('question-text');
+const difficultyBadge = safeGetElement('difficulty-badge');
+const currentScoreEl = safeGetElement('current-score');
+const progressBar = safeGetElement('progress-bar');
+const optionsContainer = safeGetElement('options-container');
+const timerEl = safeGetElement('timer');
+const timesupOverlay = safeGetElement('timesup-overlay');
+const exitModal = safeGetElement('exit-modal');
+const resultDomain = safeGetElement('result-domain');
+const finalScoreEl = safeGetElement('final-score');
+const correctCountEl = safeGetElement('correct-count');
+const wrongCountEl = safeGetElement('wrong-count');
+const performanceText = safeGetElement('performance-text');
+const highScoreEl = safeGetElement('high-score');
 
 // Domain display names (shared)
 const domainNames = {
@@ -301,8 +339,9 @@ function selectDomain(domain) {
     currentQuestions.sort(() => Math.random() - 0.5);
 
     // Show selected domain name on the rule book card
-    document.getElementById('rulebook-domain-tag').textContent =
-        '▸ Domain: ' + domainNames[domain];
+    if (rulebookDomainTag) {
+        rulebookDomainTag.textContent = '▸ Domain: ' + domainNames[domain];
+    }
 
     showScreen('rulebook');
 }
@@ -326,19 +365,19 @@ function goBackToDomains() {
 
 // Show Screen
 function showScreen(screen) {
-    domainScreen.classList.add('hidden');
-    quizScreen.classList.add('hidden');
-    resultScreen.classList.add('hidden');
-    rulebookScreen.classList.add('hidden');
+    if (domainScreen) domainScreen.classList.add('hidden');
+    if (quizScreen) quizScreen.classList.add('hidden');
+    if (resultScreen) resultScreen.classList.add('hidden');
+    if (rulebookScreen) rulebookScreen.classList.add('hidden');
     
     if (screen === 'domain') {
-        domainScreen.classList.remove('hidden');
+        if (domainScreen) domainScreen.classList.remove('hidden');
     } else if (screen === 'rulebook') {
-        rulebookScreen.classList.remove('hidden');
+        if (rulebookScreen) rulebookScreen.classList.remove('hidden');
     } else if (screen === 'quiz') {
-        quizScreen.classList.remove('hidden');
+        if (quizScreen) quizScreen.classList.remove('hidden');
     } else if (screen === 'result') {
-        resultScreen.classList.remove('hidden');
+        if (resultScreen) resultScreen.classList.remove('hidden');
     }
 }
 
@@ -347,28 +386,52 @@ function loadQuestion() {
     answered = false;
     const question = currentQuestions[currentQuestionIndex];
     
-    // Update UI
-    document.getElementById('domain-badge').textContent = currentDomain.charAt(0).toUpperCase() + currentDomain.slice(1);
-    document.getElementById('current-question').textContent = currentQuestionIndex + 1;
-    document.getElementById('question-text').textContent = question.question;
-    document.getElementById('difficulty-badge').textContent = `Difficulty: ${question.difficulty}`;
-    document.getElementById('current-score').textContent = score;
+    // Update UI with null checks
+    if (domainBadge) {
+        domainBadge.textContent = currentDomain.charAt(0).toUpperCase() + currentDomain.slice(1);
+    }
+    if (currentQuestionEl) {
+        currentQuestionEl.textContent = currentQuestionIndex + 1;
+    }
+    if (questionText) {
+        questionText.textContent = question.question;
+    }
+    if (difficultyBadge) {
+        difficultyBadge.textContent = `Difficulty: ${question.difficulty}`;
+    }
+    if (currentScoreEl) {
+        currentScoreEl.textContent = score;
+    }
     
     // Update progress bar
     const progress = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
-    document.getElementById('progress-bar').style.width = `${progress}%`;
+    if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+    }
     
     // Load options — shuffle a copy so the original data is never mutated
     shuffledOptions = shuffleArray(question.options);
     const correctAnswerValue = question.options[question.correctAnswer];
 
-    const optionsContainer = document.getElementById('options-container');
+    if (!optionsContainer) {
+        console.error('Options container not found');
+        return;
+    }
     optionsContainer.innerHTML = '';
     
     shuffledOptions.forEach((option, index) => {
         const button = document.createElement('button');
         button.className = 'option-btn';
-        button.innerHTML = `<span class="font-medium mr-3">${String.fromCharCode(65 + index)}.</span> ${option}`;
+
+        // SECURITY: Use textContent instead of innerHTML to prevent XSS
+        const letterSpan = document.createElement('span');
+        letterSpan.className = 'font-medium mr-3';
+        letterSpan.textContent = `${String.fromCharCode(65 + index)}.`;
+        button.appendChild(letterSpan);
+
+        const optionText = document.createTextNode(' ' + option);
+        button.appendChild(optionText);
+
         button.onclick = () => selectAnswer(index, correctAnswerValue);
         optionsContainer.appendChild(button);
     });
@@ -380,13 +443,17 @@ function loadQuestion() {
 // Start Timer
 function startTimer() {
     timeLeft = 15;
-    document.getElementById('timer').textContent = timeLeft;
+    if (timerEl) {
+        timerEl.textContent = timeLeft;
+    }
     
     if (timer) clearInterval(timer);
     
     timer = setInterval(() => {
         timeLeft--;
-        document.getElementById('timer').textContent = timeLeft;
+        if (timerEl) {
+            timerEl.textContent = timeLeft;
+        }
         
         if (timeLeft <= 0) {
             clearInterval(timer);
@@ -414,11 +481,14 @@ function timeUp() {
     });
 
     // Show retro "Time's Up!" overlay
-    const overlay = document.getElementById('timesup-overlay');
-    overlay.classList.remove('hidden');
+    if (timesupOverlay) {
+        timesupOverlay.classList.remove('hidden');
+    }
 
     setTimeout(() => {
-        overlay.classList.add('hidden');
+        if (timesupOverlay) {
+            timesupOverlay.classList.add('hidden');
+        }
         nextQuestion();
     }, 1500);
 }
@@ -470,10 +540,18 @@ function nextQuestion() {
 function showResults() {
     showScreen('result');
     
-    document.getElementById('result-domain').textContent = domainNames[currentDomain];
-    document.getElementById('final-score').textContent = score;
-    document.getElementById('correct-count').textContent = correctCount;
-    document.getElementById('wrong-count').textContent = wrongCount;
+    if (resultDomain) {
+        resultDomain.textContent = domainNames[currentDomain];
+    }
+    if (finalScoreEl) {
+        finalScoreEl.textContent = score;
+    }
+    if (correctCountEl) {
+        correctCountEl.textContent = correctCount;
+    }
+    if (wrongCountEl) {
+        wrongCountEl.textContent = wrongCount;
+    }
     
     // Performance text
     let performance = '';
@@ -484,7 +562,9 @@ function showResults() {
     } else {
         performance = '🌱 Beginner';
     }
-    document.getElementById('performance-text').textContent = performance;
+    if (performanceText) {
+        performanceText.textContent = performance;
+    }
     
     // High score
     const highScoreKey = `highscore_${currentDomain}`;
@@ -492,9 +572,13 @@ function showResults() {
     
     if (score > currentHighScore) {
         localStorage.setItem(highScoreKey, score);
-        document.getElementById('high-score').textContent = score + ' (New!)';
+        if (highScoreEl) {
+            highScoreEl.textContent = score + ' (New!)';
+        }
     } else {
-        document.getElementById('high-score').textContent = currentHighScore;
+        if (highScoreEl) {
+            highScoreEl.textContent = currentHighScore;
+        }
     }
 }
 
@@ -525,18 +609,24 @@ function changeDomain() {
 
 // Show the confirmation modal (pauses timer visually — timer keeps state)
 function confirmExit() {
-    document.getElementById('exit-modal').classList.remove('hidden');
+    if (exitModal) {
+        exitModal.classList.remove('hidden');
+    }
 }
 
 // User cancelled — close modal, quiz continues untouched
 function cancelExit() {
-    document.getElementById('exit-modal').classList.add('hidden');
+    if (exitModal) {
+        exitModal.classList.add('hidden');
+    }
 }
 
 // User confirmed exit
 function exitQuiz() {
     // 1. Close modal immediately
-    document.getElementById('exit-modal').classList.add('hidden');
+    if (exitModal) {
+        exitModal.classList.add('hidden');
+    }
 
     // 2. Stop timer instantly
     if (timer) {
@@ -545,14 +635,19 @@ function exitQuiz() {
     }
 
     // 3. Hide any active overlay (e.g. times-up)
-    document.getElementById('timesup-overlay').classList.add('hidden');
+    if (timesupOverlay) {
+        timesupOverlay.classList.add('hidden');
+    }
 
     // 4. Fade-out animation then go to domain screen
-    const qs = document.getElementById('quiz-screen');
-    qs.classList.add('exiting');
+    if (quizScreen) {
+        quizScreen.classList.add('exiting');
+    }
 
     setTimeout(() => {
-        qs.classList.remove('exiting');
+        if (quizScreen) {
+            quizScreen.classList.remove('exiting');
+        }
 
         // 5. Reset quiz state
         currentDomain = null;
@@ -571,8 +666,8 @@ function exitQuiz() {
 // ESC key shortcut — opens confirm dialog during quiz
 document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
-        const quizVisible = !document.getElementById('quiz-screen').classList.contains('hidden');
-        const modalVisible = !document.getElementById('exit-modal').classList.contains('hidden');
+        const quizVisible = quizScreen && !quizScreen.classList.contains('hidden');
+        const modalVisible = exitModal && !exitModal.classList.contains('hidden');
 
         if (modalVisible) {
             cancelExit();   // ESC also dismisses the modal (keep going)
@@ -581,3 +676,19 @@ document.addEventListener('keydown', function (e) {
         }
     }
 });
+
+// ══════════════════════════════════════════
+//  SECURITY: Expose only necessary functions to global scope
+//  for HTML inline onclick handlers
+// ══════════════════════════════════════════
+window.selectDomain = selectDomain;
+window.startQuiz = startQuiz;
+window.goBackToDomains = goBackToDomains;
+window.restartQuiz = restartQuiz;
+window.changeDomain = changeDomain;
+window.confirmExit = confirmExit;
+window.cancelExit = cancelExit;
+window.exitQuiz = exitQuiz;
+window.toggleTheme = toggleTheme;
+
+})();
