@@ -8,6 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- ══ THEME TOGGLE ══ -->
+    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" title="Toggle theme">
+        <span id="theme-icon">☀️</span>
+        <span id="theme-label">LIGHT</span>
+    </button>
+
     <div class="w-full max-w-4xl">
         
         <!-- Domain Selection Screen -->
@@ -206,6 +213,202 @@
     </div>
 
     <style>
+        /* ══════════════════════════════
+           DARK MODE — CSS variable overrides
+           Applied when <html data-theme="dark">
+        ══════════════════════════════ */
+
+        /* Light is the default — these match Tailwind token values */
+        :root {
+            --bg-background: #f0f0f0;
+            --bg-grid:       rgba(0,0,0,0.05);
+            --bg-card:       #ffffff;
+            --bg-white:      #ffffff;
+            --bg-gray-100:   #f3f4f6;
+            --bg-gray-300:   #d1d5db;
+            --bg-gray-50:    #f9fafb;
+            --color-text:    #1f2937;
+            --color-muted:   #6b7280;
+            --color-border:  #1f2937;
+        }
+
+        [data-theme="dark"] {
+            --bg-background: #111827;
+            --bg-grid:       rgba(255,255,255,0.04);
+            --bg-card:       #1f2937;
+            --bg-white:      #1f2937;
+            --bg-gray-100:   #374151;
+            --bg-gray-300:   #374151;
+            --bg-gray-50:    #374151;
+            --color-text:    #f9fafb;
+            --color-muted:   #9ca3af;
+            --color-border:  #4b5563;
+        }
+
+        /* ── Apply variables to body & grid ── */
+        body {
+            background-color: var(--bg-background) !important;
+            background-image:
+                linear-gradient(var(--bg-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px) !important;
+            color: var(--color-text) !important;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* ── Tailwind utility overrides ── */
+        [data-theme="dark"] .bg-white       { background-color: var(--bg-white)    !important; }
+        [data-theme="dark"] .bg-gray-50     { background-color: var(--bg-gray-50)  !important; }
+        [data-theme="dark"] .bg-gray-100    { background-color: var(--bg-gray-100) !important; }
+        [data-theme="dark"] .bg-gray-300    { background-color: var(--bg-gray-300) !important; }
+        [data-theme="dark"] .text-text      { color: var(--color-text)   !important; }
+        [data-theme="dark"] .text-muted     { color: var(--color-muted)  !important; }
+        [data-theme="dark"] .border-border  { border-color: var(--color-border) !important; }
+        [data-theme="dark"] .shadow-retro   { box-shadow: 4px 4px 0px 0px var(--color-border) !important; }
+        [data-theme="dark"] .shadow-retro-sm{ box-shadow: 2px 2px 0px 0px var(--color-border) !important; }
+
+        /* ── Cards & option buttons ── */
+        [data-theme="dark"] .card {
+            background-color: var(--bg-card) !important;
+            border-color: var(--color-border) !important;
+            box-shadow: 4px 4px 0px 0px var(--color-border) !important;
+        }
+        [data-theme="dark"] .option-btn {
+            background-color: var(--bg-card) !important;
+            border-color: var(--color-border) !important;
+            color: var(--color-text) !important;
+            box-shadow: 2px 2px 0px 0px var(--color-border) !important;
+        }
+        [data-theme="dark"] .option-btn:hover {
+            background-color: var(--bg-gray-100) !important;
+        }
+        [data-theme="dark"] .domain-card {
+            background-color: var(--bg-card) !important;
+            border-color: var(--color-border) !important;
+            box-shadow: 4px 4px 0px 0px var(--color-border) !important;
+        }
+        [data-theme="dark"] .btn-secondary {
+            background-color: var(--bg-card) !important;
+            border-color: var(--color-border) !important;
+            color: var(--color-text) !important;
+            box-shadow: 2px 2px 0px 0px var(--color-border) !important;
+        }
+        [data-theme="dark"] .btn-secondary:hover {
+            background-color: var(--bg-gray-100) !important;
+        }
+
+        /* ── Exit modal ── */
+        [data-theme="dark"] #exit-modal-card {
+            background: #1f2937 !important;
+            border-color: #4b5563 !important;
+            box-shadow: 10px 10px 0px #4b5563 !important;
+        }
+        [data-theme="dark"] #exit-modal-title { color: #f9fafb !important; }
+        [data-theme="dark"] #exit-modal-sub   { color: #9ca3af !important; }
+
+        /* ── Rule book ── */
+        [data-theme="dark"] #rulebook-card {
+            background: #1f2937 !important;
+            border-color: #4b5563 !important;
+            box-shadow: 10px 10px 0px #4b5563 !important;
+        }
+        [data-theme="dark"] #rulebook-title     { color: #f9fafb !important; text-shadow: 4px 4px 0px #ffe600 !important; }
+        [data-theme="dark"] #rulebook-subtitle  { color: #9ca3af !important; }
+        [data-theme="dark"] #rulebook-domain-tag{ color: #9ca3af !important; }
+        [data-theme="dark"] #rulebook-list li {
+            background: #111827 !important;
+            border-color: #4b5563 !important;
+            color: #f9fafb !important;
+            box-shadow: 3px 3px 0 #4b5563 !important;
+        }
+        [data-theme="dark"] #rulebook-corner-tl,
+        [data-theme="dark"] #rulebook-corner-tr,
+        [data-theme="dark"] #rulebook-corner-bl,
+        [data-theme="dark"] #rulebook-corner-br { color: #9ca3af !important; }
+        [data-theme="dark"] #rb-back-btn {
+            background: #374151 !important;
+            color: #f9fafb !important;
+            border-color: #4b5563 !important;
+            box-shadow: 4px 4px 0px #4b5563 !important;
+        }
+        [data-theme="dark"] #rb-back-btn:hover {
+            background: #f9fafb !important;
+            color: #111827 !important;
+        }
+
+        /* ── Timer box ── */
+        [data-theme="dark"] #quiz-screen .bg-white {
+            background-color: #374151 !important;
+        }
+
+        /* ── Result screen stat boxes ── */
+        [data-theme="dark"] #result-screen .bg-white {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+        }
+
+        /* ══════════════════════════════
+           THEME TOGGLE BUTTON
+        ══════════════════════════════ */
+        #theme-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 20000;
+
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.45rem;
+            letter-spacing: 1px;
+
+            background: #1a1a1a;
+            color: #ffe600;
+            border: 3px solid #1a1a1a;
+            box-shadow: 4px 4px 0px #555;
+            padding: 8px 12px;
+            cursor: pointer;
+            user-select: none;
+
+            transition: transform 0.1s ease, box-shadow 0.1s ease,
+                        background 0.25s ease, color 0.25s ease;
+        }
+        #theme-toggle:hover {
+            transform: scale(1.06) translateY(-1px);
+            box-shadow: 5px 5px 0px #ffe600;
+        }
+        #theme-toggle:active {
+            transform: scale(0.97) translateY(1px);
+            box-shadow: 2px 2px 0px #555;
+        }
+
+        /* Light mode: invert colours so it reads well on light bg */
+        [data-theme="light"] #theme-toggle,
+        :root:not([data-theme="dark"]) #theme-toggle {
+            background: #1a1a1a;
+            color: #ffe600;
+        }
+
+        [data-theme="dark"] #theme-toggle {
+            background: #ffe600;
+            color: #1a1a1a;
+            border-color: #1a1a1a;
+            box-shadow: 4px 4px 0px #1a1a1a;
+        }
+        [data-theme="dark"] #theme-toggle:hover {
+            box-shadow: 5px 5px 0px #1a1a1a;
+        }
+
+        /* Icon swap animation */
+        #theme-icon {
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+        #theme-toggle:hover #theme-icon {
+            transform: rotate(20deg) scale(1.2);
+        }
+
         /* ══════════════════════════════
            RULE BOOK SCREEN
         ══════════════════════════════ */
@@ -545,6 +748,42 @@
             100% { opacity: 1; }
         }
     </style>
+
+    <!-- ══ THEME LOGIC — runs before script.js ══ -->
+    <script>
+        (function () {
+            // Apply saved theme (default = light)
+            var saved = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', saved);
+            // Button label/icon sync happens after DOM ready (see updateToggleUI)
+        })();
+
+        function updateToggleUI(theme) {
+            var icon  = document.getElementById('theme-icon');
+            var label = document.getElementById('theme-label');
+            if (!icon || !label) return;
+            if (theme === 'dark') {
+                icon.textContent  = '🌙';
+                label.textContent = 'DARK';
+            } else {
+                icon.textContent  = '☀️';
+                label.textContent = 'LIGHT';
+            }
+        }
+
+        function toggleTheme() {
+            var current = document.documentElement.getAttribute('data-theme') || 'light';
+            var next    = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateToggleUI(next);
+        }
+
+        // Sync button UI once the DOM is ready
+        document.addEventListener('DOMContentLoaded', function () {
+            updateToggleUI(localStorage.getItem('theme') || 'light');
+        });
+    </script>
 
     <script src="script.js"></script>
 </body>
