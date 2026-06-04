@@ -268,6 +268,67 @@ let wrongCount = 0;
 let answered = false;
 let shuffledOptions = []; // shuffled copy of options for the current question
 
+// ══════════════════════════════════════════
+//  RATE LIMITING: Prevent spam clicking
+// ══════════════════════════════════════════
+let isProcessing = false; // Prevents rapid action spam
+let lastActionTime = 0;  // Tracks last action timestamp
+const ACTION_COOLDOWN = 300; // 300ms cooldown between actions
+
+// Helper function to check if action is allowed (rate limiting)
+function canPerformAction() {
+    const now = Date.now();
+    if (isProcessing || (now - lastActionTime) < ACTION_COOLDOWN) {
+        return false;
+    }
+    lastActionTime = now;
+    return true;
+}
+
+// ══════════════════════════════════════════
+//  EVENT LISTENER: Prevent duplication
+// ══════════════════════════════════════════
+let keydownListenerAdded = false; // Track if keydown listener is added
+
+// ══════════════════════════════════════════
+//  TIMER CLEANUP: Prevent memory leaks
+// ══════════════════════════════════════════
+function cleanupTimer() {
+    if (timer) {
+        clearInterval(timer);
+        timer = null;
+    }
+}
+
+// ══════════════════════════════════════════
+//  INPUT VALIDATION: Validate dynamic data
+// ══════════════════════════════════════════
+
+// Validate domain parameter
+function isValidDomain(domain) {
+    const validDomains = ['fullstack', 'gamedev', 'uiux', 'hacking'];
+    return validDomains.includes(domain);
+}
+
+// Validate question data structure
+function isValidQuestion(question) {
+    return question &&
+           typeof question.question === 'string' &&
+           Array.isArray(question.options) &&
+           question.options.length > 0 &&
+           typeof question.correctAnswer === 'number' &&
+           question.correctAnswer >= 0 &&
+           question.correctAnswer < question.options.length &&
+           typeof question.difficulty === 'string';
+}
+
+// Validate index is within bounds
+function isValidIndex(index, array) {
+    return typeof index === 'number' &&
+           index >= 0 &&
+           index < array.length;
+}
+
 // Fisher-Yates shuffle — returns a new shuffled array, never mutates the original
 function shuffleArray(arr) {
     const copy = [...arr];
@@ -328,6 +389,15 @@ const domainNames = {
 //  Select Domain → show Rule Book first
 // ──────────────────────────────────────────
 function selectDomain(domain) {
+    // RATE LIMITING: Prevent spam clicking
+    if (!canPerformAction()) return;
+
+    // INPUT VALIDATION: Validate domain parameter
+    if (!isValidDomain(domain)) {
+        console.error('Invalid domain:', domain);
+        return;
+    }
+
     currentDomain = domain;
     currentQuestions = [...quizData[domain]];
     currentQuestionIndex = 0;
@@ -350,6 +420,9 @@ function selectDomain(domain) {
 //  Rule Book → Start Quiz
 // ──────────────────────────────────────────
 function startQuiz() {
+    // RATE LIMITING: Prevent spam clicking
+    if (!canPerformAction()) return;
+
     showScreen('quiz');
     loadQuestion();
 }
@@ -358,6 +431,12 @@ function startQuiz() {
 //  Rule Book → Go Back to domain selection
 // ──────────────────────────────────────────
 function goBackToDomains() {
+    // RATE LIMITING: Prevent spam clicking
+    if (!canPerformAction()) return;
+
+    // TIMER CLEANUP: Stop timer if going back
+    cleanupTimer();
+
     currentDomain = null;
     currentQuestions = [];
     showScreen('domain');
@@ -385,6 +464,12 @@ function showScreen(screen) {
 function loadQuestion() {
     answered = false;
     const question = currentQuestions[currentQuestionIndex];
+
+    // INPUT VALIDATION: Validate question data
+    if (!isValidQuestion(question)) {
+        console.error('Invalid question data at index:', currentQuestionIndex);
+        return;
+    }
     
     // Update UI with null checks
     if (domainBadge) {
@@ -447,7 +532,8 @@ function startTimer() {
         timerEl.textContent = timeLeft;
     }
     
-    if (timer) clearInterval(timer);
+    // TIMER CLEANUP: Clear any existing timer before starting new one
+    cleanupTimer();
     
     timer = setInterval(() => {
         timeLeft--;
@@ -456,7 +542,7 @@ function startTimer() {
         }
         
         if (timeLeft <= 0) {
-            clearInterval(timer);
+            cleanupTimer();
             if (!answered) {
                 timeUp();
             }
@@ -495,10 +581,20 @@ function timeUp() {
 
 // Select Answer
 function selectAnswer(selectedIndex, correctAnswerValue) {
-    if (answered) return;
+    // RATE LIMITING: Prevent spam clicking
+    if (answered || !canPerformAction()) return;
+
+    // INPUT VALIDATION: Validate selected index
+    if (!isValidIndex(selectedIndex, shuffledOptions)) {
+        console.error('Invalid selected index:', selectedIndex);
+        return;
+    }
+
     answered = true;
+    isProcessing = true;
     
-    clearInterval(timer);
+    // TIMER CLEANUP: Stop timer when answer is selected
+    cleanupTimer();
     
     const buttons = document.querySelectorAll('.option-btn');
     
@@ -518,9 +614,12 @@ function selectAnswer(selectedIndex, correctAnswerValue) {
         wrongCount++;
     }
     
-    document.getElementById('current-score').textContent = score;
+    if (currentScoreEl) {
+        currentScoreEl.textContent = score;
+    }
     
     setTimeout(() => {
+        isProcessing = false;
         nextQuestion();
     }, 1500);
 }
@@ -538,6 +637,9 @@ function nextQuestion() {
 
 // Show Results
 function showResults() {
+    // TIMER CLEANUP: Ensure timer is stopped when showing results
+    cleanupTimer();
+    
     showScreen('result');
     
     if (resultDomain) {
@@ -584,6 +686,9 @@ function showResults() {
 
 // Restart Quiz
 function restartQuiz() {
+    // RATE LIMITING: Prevent rapid restart spam
+    if (!canPerformAction()) return;
+
     currentQuestionIndex = 0;
     score = 0;
     correctCount = 0;
@@ -598,6 +703,9 @@ function restartQuiz() {
 
 // Change Domain
 function changeDomain() {
+    // RATE LIMITING: Prevent spam clicking
+    if (!canPerformAction()) return;
+
     currentDomain = null;
     currentQuestions = [];
     showScreen('domain');
@@ -609,6 +717,9 @@ function changeDomain() {
 
 // Show the confirmation modal (pauses timer visually — timer keeps state)
 function confirmExit() {
+    // RATE LIMITING: Prevent spam clicking
+    if (!canPerformAction()) return;
+
     if (exitModal) {
         exitModal.classList.remove('hidden');
     }
@@ -616,6 +727,9 @@ function confirmExit() {
 
 // User cancelled — close modal, quiz continues untouched
 function cancelExit() {
+    // RATE LIMITING: Prevent spam clicking
+    if (!canPerformAction()) return;
+
     if (exitModal) {
         exitModal.classList.add('hidden');
     }
@@ -623,16 +737,16 @@ function cancelExit() {
 
 // User confirmed exit
 function exitQuiz() {
+    // RATE LIMITING: Prevent spam clicking
+    if (!canPerformAction()) return;
+
     // 1. Close modal immediately
     if (exitModal) {
         exitModal.classList.add('hidden');
     }
 
-    // 2. Stop timer instantly
-    if (timer) {
-        clearInterval(timer);
-        timer = null;
-    }
+    // 2. TIMER CLEANUP: Stop timer instantly
+    cleanupTimer();
 
     // 3. Hide any active overlay (e.g. times-up)
     if (timesupOverlay) {
@@ -664,18 +778,22 @@ function exitQuiz() {
 }
 
 // ESC key shortcut — opens confirm dialog during quiz
-document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-        const quizVisible = quizScreen && !quizScreen.classList.contains('hidden');
-        const modalVisible = exitModal && !exitModal.classList.contains('hidden');
+// EVENT LISTENER: Prevent duplication by checking flag
+if (!keydownListenerAdded) {
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            const quizVisible = quizScreen && !quizScreen.classList.contains('hidden');
+            const modalVisible = exitModal && !exitModal.classList.contains('hidden');
 
-        if (modalVisible) {
-            cancelExit();   // ESC also dismisses the modal (keep going)
-        } else if (quizVisible) {
-            confirmExit();
+            if (modalVisible) {
+                cancelExit();   // ESC also dismisses the modal (keep going)
+            } else if (quizVisible) {
+                confirmExit();
+            }
         }
-    }
-});
+    });
+    keydownListenerAdded = true;
+}
 
 // ══════════════════════════════════════════
 //  SECURITY: Expose only necessary functions to global scope
