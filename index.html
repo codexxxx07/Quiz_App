@@ -50,14 +50,19 @@
         </div>
 
         <!-- Quiz Screen -->
-        <div id="quiz-screen" class="hidden animate-slide-up">
+        <div id="quiz-screen" class="hidden animate-slide-up" style="position: relative;">
+            <!-- Exit button — anchored to top-right corner of quiz screen -->
+            <button id="exit-btn" onclick="confirmExit()" title="Quit Quiz (ESC)" aria-label="Exit Quiz">
+                ✖ EXIT
+            </button>
+
             <!-- Top Bar -->
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex justify-between items-center mb-6" style="padding-right: 90px;">
                 <div class="flex items-center gap-4">
                     <span id="domain-badge" class="bg-accent/20 text-accent px-4 py-2 rounded border-2 border-border text-sm font-medium"></span>
                     <span class="text-muted">Question <span id="current-question">1</span>/10</span>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3">
                     <div class="w-12 h-12 rounded border-4 border-border flex items-center justify-center bg-white shadow-retro-sm">
                         <span id="timer" class="text-accent font-bold text-lg">15</span>
                     </div>
@@ -129,6 +134,18 @@
 
     </div>
 
+    <!-- Exit Confirmation Modal -->
+    <div id="exit-modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="exit-modal-title">
+        <div id="exit-modal-card">
+            <p id="exit-modal-title">QUIT QUIZ?</p>
+            <p id="exit-modal-sub">Your progress will be lost.</p>
+            <div id="exit-modal-btns">
+                <button id="exit-confirm-btn" onclick="exitQuiz()">YES, QUIT</button>
+                <button id="exit-cancel-btn" onclick="cancelExit()">KEEP GOING</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Retro "Time's Up!" Overlay -->
     <div id="timesup-overlay" class="hidden" aria-live="assertive" role="alert">
         <div id="timesup-card">
@@ -137,6 +154,127 @@
     </div>
 
     <style>
+        /* ══════════════════════════════
+           EXIT BUTTON
+        ══════════════════════════════ */
+        #exit-btn {
+            /* ── Position: top-right corner of the quiz screen ── */
+            position: absolute;
+            top: 0;
+            right: 0;
+
+            /* ── Retro style (unchanged) ── */
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            letter-spacing: 1px;
+            background: #ff2222;
+            color: #fff;
+            border: 3px solid #1a1a1a;
+            box-shadow: 4px 4px 0px #1a1a1a;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            user-select: none;
+        }
+        #exit-btn:hover {
+            transform: scale(1.05) translateY(-1px);
+            background: #1a1a1a;
+            color: #ff2222;
+            box-shadow: 5px 5px 0px #ff2222;
+        }
+        #exit-btn:active {
+            transform: scale(0.97) translateY(1px);
+            box-shadow: 2px 2px 0px #1a1a1a;
+        }
+
+        /* ══════════════════════════════
+           EXIT CONFIRMATION MODAL
+        ══════════════════════════════ */
+        #exit-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.65);
+        }
+        #exit-modal.hidden { display: none; }
+
+        #exit-modal-card {
+            background: #fffbe6;
+            border: 6px solid #1a1a1a;
+            box-shadow: 10px 10px 0px #1a1a1a;
+            padding: 36px 44px;
+            text-align: center;
+            animation: retro-pop 0.2s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+            min-width: 280px;
+        }
+
+        #exit-modal-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(1rem, 3.5vw, 1.5rem);
+            color: #1a1a1a;
+            text-shadow: 3px 3px 0px #ff2222;
+            margin-bottom: 10px;
+        }
+
+        #exit-modal-sub {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            color: #555;
+            margin-bottom: 24px;
+            line-height: 1.7;
+        }
+
+        #exit-modal-btns {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        #exit-confirm-btn, #exit-cancel-btn {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.6rem;
+            border: 3px solid #1a1a1a;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            user-select: none;
+        }
+
+        #exit-confirm-btn {
+            background: #ff2222;
+            color: #fff;
+            box-shadow: 4px 4px 0px #1a1a1a;
+        }
+        #exit-confirm-btn:hover {
+            background: #1a1a1a;
+            color: #ff2222;
+            transform: scale(1.05);
+        }
+
+        #exit-cancel-btn {
+            background: #1a1a1a;
+            color: #ffe600;
+            box-shadow: 4px 4px 0px #555;
+        }
+        #exit-cancel-btn:hover {
+            background: #ffe600;
+            color: #1a1a1a;
+            transform: scale(1.05);
+        }
+
+        /* ── Quiz screen fade-out on exit ── */
+        #quiz-screen.exiting {
+            animation: quiz-fade-out 0.3s ease forwards;
+        }
+        @keyframes quiz-fade-out {
+            from { opacity: 1; transform: translateY(0); }
+            to   { opacity: 0; transform: translateY(-12px); }
+        }
+
         /* ── Overlay backdrop ── */
         #timesup-overlay {
             position: fixed;

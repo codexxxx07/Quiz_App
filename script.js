@@ -477,3 +477,66 @@ function changeDomain() {
     currentQuestions = [];
     showScreen('domain');
 }
+
+// ══════════════════════════════════════════
+//  EXIT QUIZ FEATURE
+// ══════════════════════════════════════════
+
+// Show the confirmation modal (pauses timer visually — timer keeps state)
+function confirmExit() {
+    document.getElementById('exit-modal').classList.remove('hidden');
+}
+
+// User cancelled — close modal, quiz continues untouched
+function cancelExit() {
+    document.getElementById('exit-modal').classList.add('hidden');
+}
+
+// User confirmed exit
+function exitQuiz() {
+    // 1. Close modal immediately
+    document.getElementById('exit-modal').classList.add('hidden');
+
+    // 2. Stop timer instantly
+    if (timer) {
+        clearInterval(timer);
+        timer = null;
+    }
+
+    // 3. Hide any active overlay (e.g. times-up)
+    document.getElementById('timesup-overlay').classList.add('hidden');
+
+    // 4. Fade-out animation then go to domain screen
+    const qs = document.getElementById('quiz-screen');
+    qs.classList.add('exiting');
+
+    setTimeout(() => {
+        qs.classList.remove('exiting');
+
+        // 5. Reset quiz state
+        currentDomain = null;
+        currentQuestions = [];
+        currentQuestionIndex = 0;
+        score = 0;
+        correctCount = 0;
+        wrongCount = 0;
+        answered = false;
+
+        // 6. Navigate back to domain selection
+        showScreen('domain');
+    }, 300);
+}
+
+// ESC key shortcut — opens confirm dialog during quiz
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        const quizVisible = !document.getElementById('quiz-screen').classList.contains('hidden');
+        const modalVisible = !document.getElementById('exit-modal').classList.contains('hidden');
+
+        if (modalVisible) {
+            cancelExit();   // ESC also dismisses the modal (keep going)
+        } else if (quizVisible) {
+            confirmExit();
+        }
+    }
+});
