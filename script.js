@@ -260,6 +260,17 @@ let timeLeft = 15;
 let correctCount = 0;
 let wrongCount = 0;
 let answered = false;
+let shuffledOptions = []; // shuffled copy of options for the current question
+
+// Fisher-Yates shuffle — returns a new shuffled array, never mutates the original
+function shuffleArray(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+}
 
 // DOM Elements
 const domainScreen = document.getElementById('domain-screen');
@@ -313,15 +324,18 @@ function loadQuestion() {
     const progress = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
     document.getElementById('progress-bar').style.width = `${progress}%`;
     
-    // Load options
+    // Load options — shuffle a copy so the original data is never mutated
+    shuffledOptions = shuffleArray(question.options);
+    const correctAnswerValue = question.options[question.correctAnswer];
+
     const optionsContainer = document.getElementById('options-container');
     optionsContainer.innerHTML = '';
     
-    question.options.forEach((option, index) => {
+    shuffledOptions.forEach((option, index) => {
         const button = document.createElement('button');
         button.className = 'option-btn';
         button.innerHTML = `<span class="font-medium mr-3">${String.fromCharCode(65 + index)}.</span> ${option}`;
-        button.onclick = () => selectAnswer(index);
+        button.onclick = () => selectAnswer(index, correctAnswerValue);
         optionsContainer.appendChild(button);
     });
     
@@ -355,11 +369,12 @@ function timeUp() {
     wrongCount++;
     
     const question = currentQuestions[currentQuestionIndex];
+    const correctAnswerValue = question.options[question.correctAnswer];
     const buttons = document.querySelectorAll('.option-btn');
     
     buttons.forEach((button, index) => {
         button.disabled = true;
-        if (index === question.correctAnswer) {
+        if (shuffledOptions[index] === correctAnswerValue) {
             button.classList.add('correct');
         }
     });
@@ -375,25 +390,24 @@ function timeUp() {
 }
 
 // Select Answer
-function selectAnswer(selectedIndex) {
+function selectAnswer(selectedIndex, correctAnswerValue) {
     if (answered) return;
     answered = true;
     
     clearInterval(timer);
     
-    const question = currentQuestions[currentQuestionIndex];
     const buttons = document.querySelectorAll('.option-btn');
     
     buttons.forEach((button, index) => {
         button.disabled = true;
-        if (index === question.correctAnswer) {
+        if (shuffledOptions[index] === correctAnswerValue) {
             button.classList.add('correct');
-        } else if (index === selectedIndex && selectedIndex !== question.correctAnswer) {
+        } else if (index === selectedIndex && shuffledOptions[selectedIndex] !== correctAnswerValue) {
             button.classList.add('wrong');
         }
     });
     
-    if (selectedIndex === question.correctAnswer) {
+    if (shuffledOptions[selectedIndex] === correctAnswerValue) {
         score += 10;
         correctCount++;
     } else {
