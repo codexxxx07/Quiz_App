@@ -6,6 +6,13 @@
     <title>Quiz App - Test Your Knowledge</title>
     <link rel="stylesheet" href="dist/output.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <!-- ══ THEME PRELOAD — always force light mode on load ══ -->
+    <script>
+        (function () {
+            localStorage.removeItem('theme');
+            document.documentElement.setAttribute('data-theme', 'light');
+        })();
+    </script>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
@@ -771,15 +778,8 @@
         }
     </style>
 
-    <!-- ══ THEME LOGIC — runs before script.js ══ -->
+    <!-- ══ THEME LOGIC — toggle + UI sync (theme is already applied in <head>) ══ -->
     <script>
-        (function () {
-            // Apply saved theme (default = light)
-            var saved = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', saved);
-            // Button label/icon sync happens after DOM ready (see updateToggleUI)
-        })();
-
         function updateToggleUI(theme) {
             var icon = document.getElementById('theme-icon');
             if (!icon) return;
@@ -792,7 +792,7 @@
             var current = document.documentElement.getAttribute('data-theme') || 'light';
             var next    = current === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
+            // No localStorage — dark mode is session-only, resets on refresh
             updateToggleUI(next);
         }
 
