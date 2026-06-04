@@ -10,9 +10,8 @@
 <body class="min-h-screen flex items-center justify-center p-4">
 
     <!-- ══ THEME TOGGLE ══ -->
-    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" title="Toggle theme">
-        <span id="theme-icon">☀️</span>
-        <span id="theme-label">LIGHT</span>
+    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" title="Toggle light / dark mode">
+        <span id="theme-icon">🌙</span>
     </button>
 
     <div class="w-full max-w-4xl">
@@ -349,64 +348,87 @@
         /* ══════════════════════════════
            THEME TOGGLE BUTTON
         ══════════════════════════════ */
+
+        /* ── Base card ── */
         #theme-toggle {
             position: fixed;
             top: 16px;
             right: 16px;
             z-index: 20000;
 
+            /* Card shape */
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            border: 3px solid #1a1a1a;
+
+            /* Flat retro shadow — offset, zero blur */
+            box-shadow: 4px 4px 0px #1a1a1a;
+
+            /* Center the icon */
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
 
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.45rem;
-            letter-spacing: 1px;
+            /* No font — icon only */
+            font-size: 1.35rem;
+            line-height: 1;
 
-            background: #1a1a1a;
-            color: #ffe600;
-            border: 3px solid #1a1a1a;
-            box-shadow: 4px 4px 0px #555;
-            padding: 8px 12px;
             cursor: pointer;
             user-select: none;
+            padding: 0;
 
-            transition: transform 0.1s ease, box-shadow 0.1s ease,
-                        background 0.25s ease, color 0.25s ease;
-        }
-        #theme-toggle:hover {
-            transform: scale(1.06) translateY(-1px);
-            box-shadow: 5px 5px 0px #ffe600;
-        }
-        #theme-toggle:active {
-            transform: scale(0.97) translateY(1px);
-            box-shadow: 2px 2px 0px #555;
+            /* Smooth colour swap + press transition */
+            transition:
+                transform      0.1s ease,
+                box-shadow     0.1s ease,
+                background     0.22s ease,
+                border-color   0.22s ease;
         }
 
-        /* Light mode: invert colours so it reads well on light bg */
+        /* ── Light mode: light-gray card, dark border ── */
+        #theme-toggle,
         [data-theme="light"] #theme-toggle,
         :root:not([data-theme="dark"]) #theme-toggle {
-            background: #1a1a1a;
-            color: #ffe600;
+            background:    #e5e5e5;
+            border-color:  #1a1a1a;
+            box-shadow:    4px 4px 0px #1a1a1a;
         }
 
+        /* ── Dark mode: dark-gray card, slightly lighter border ── */
         [data-theme="dark"] #theme-toggle {
-            background: #ffe600;
-            color: #1a1a1a;
+            background:   #374151;
             border-color: #1a1a1a;
-            box-shadow: 4px 4px 0px #1a1a1a;
+            box-shadow:   4px 4px 0px #111;
         }
-        [data-theme="dark"] #theme-toggle:hover {
+
+        /* ── Hover: nudge up, shadow grows slightly ── */
+        #theme-toggle:hover {
+            transform:  scale(1.05) translateY(-1px);
             box-shadow: 5px 5px 0px #1a1a1a;
         }
+        [data-theme="dark"] #theme-toggle:hover {
+            box-shadow: 5px 5px 0px #111;
+        }
 
-        /* Icon swap animation */
+        /* ── Active/press: drop down, shadow collapses ── */
+        #theme-toggle:active {
+            transform:  translate(3px, 3px);
+            box-shadow: 1px 1px 0px #1a1a1a;
+        }
+        [data-theme="dark"] #theme-toggle:active {
+            box-shadow: 1px 1px 0px #111;
+        }
+
+        /* ── Icon: slight tilt, smooth swap ── */
         #theme-icon {
-            display: inline-block;
+            display:    inline-block;
+            transform:  rotate(-15deg);          /* playful tilt */
             transition: transform 0.2s ease;
+            filter:     none;                    /* no glow */
         }
         #theme-toggle:hover #theme-icon {
-            transform: rotate(20deg) scale(1.2);
+            transform: rotate(0deg) scale(1.15); /* straighten + grow on hover */
         }
 
         /* ══════════════════════════════
@@ -759,16 +781,11 @@
         })();
 
         function updateToggleUI(theme) {
-            var icon  = document.getElementById('theme-icon');
-            var label = document.getElementById('theme-label');
-            if (!icon || !label) return;
-            if (theme === 'dark') {
-                icon.textContent  = '🌙';
-                label.textContent = 'DARK';
-            } else {
-                icon.textContent  = '☀️';
-                label.textContent = 'LIGHT';
-            }
+            var icon = document.getElementById('theme-icon');
+            if (!icon) return;
+            // Show the moon when in light mode (click = go dark)
+            // Show the sun when in dark mode  (click = go light)
+            icon.textContent = (theme === 'dark') ? '☀️' : '🌙';
         }
 
         function toggleTheme() {
