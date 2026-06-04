@@ -363,8 +363,13 @@ function timeUp() {
             button.classList.add('correct');
         }
     });
-    
+
+    // Show retro "Time's Up!" overlay
+    const overlay = document.getElementById('timesup-overlay');
+    overlay.classList.remove('hidden');
+
     setTimeout(() => {
+        overlay.classList.add('hidden');
         nextQuestion();
     }, 1500);
 }

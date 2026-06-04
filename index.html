@@ -129,6 +129,63 @@
 
     </div>
 
+    <!-- Retro "Time's Up!" Overlay -->
+    <div id="timesup-overlay" class="hidden" aria-live="assertive" role="alert">
+        <div id="timesup-card">
+            <span id="timesup-text">TIME'S UP!</span>
+        </div>
+    </div>
+
+    <style>
+        /* ── Overlay backdrop ── */
+        #timesup-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.55);
+            pointer-events: none;
+        }
+        #timesup-overlay.hidden { display: none; }
+
+        /* ── Retro pixel card ── */
+        #timesup-card {
+            background: #FF2222;
+            border: 6px solid #1a1a1a;
+            box-shadow: 8px 8px 0px #1a1a1a;
+            padding: 28px 48px;
+            text-align: center;
+            animation: retro-pop 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards,
+                       retro-blink 0.18s step-end 0.3s 4;
+        }
+
+        /* ── Pixel text ── */
+        #timesup-text {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(1.4rem, 5vw, 2.4rem);
+            color: #FFE600;
+            text-shadow: 4px 4px 0px #1a1a1a;
+            letter-spacing: 2px;
+            display: block;
+        }
+
+        /* ── Pop-in: scale 0.8 → 1.08 → 1 ── */
+        @keyframes retro-pop {
+            0%   { transform: scale(0.8); opacity: 0; }
+            60%  { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(1);   opacity: 1; }
+        }
+
+        /* ── Quick blink (step-end keeps hard edges — retro feel) ── */
+        @keyframes retro-blink {
+            0%   { opacity: 1; }
+            50%  { opacity: 0.35; }
+            100% { opacity: 1; }
+        }
+    </style>
+
     <script src="script.js"></script>
 </body>
 </html>
