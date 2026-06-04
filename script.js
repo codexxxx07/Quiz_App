@@ -276,8 +276,19 @@ function shuffleArray(arr) {
 const domainScreen = document.getElementById('domain-screen');
 const quizScreen = document.getElementById('quiz-screen');
 const resultScreen = document.getElementById('result-screen');
+const rulebookScreen = document.getElementById('rulebook-screen');
 
-// Select Domain
+// Domain display names (shared)
+const domainNames = {
+    fullstack: 'Full Stack Development',
+    gamedev:   'Game Development',
+    uiux:      'UI/UX Design',
+    hacking:   'Ethical Hacking'
+};
+
+// ──────────────────────────────────────────
+//  Select Domain → show Rule Book first
+// ──────────────────────────────────────────
 function selectDomain(domain) {
     currentDomain = domain;
     currentQuestions = [...quizData[domain]];
@@ -285,12 +296,32 @@ function selectDomain(domain) {
     score = 0;
     correctCount = 0;
     wrongCount = 0;
-    
-    // Shuffle questions
+
+    // Shuffle questions now so the label is ready
     currentQuestions.sort(() => Math.random() - 0.5);
-    
+
+    // Show selected domain name on the rule book card
+    document.getElementById('rulebook-domain-tag').textContent =
+        '▸ Domain: ' + domainNames[domain];
+
+    showScreen('rulebook');
+}
+
+// ──────────────────────────────────────────
+//  Rule Book → Start Quiz
+// ──────────────────────────────────────────
+function startQuiz() {
     showScreen('quiz');
     loadQuestion();
+}
+
+// ──────────────────────────────────────────
+//  Rule Book → Go Back to domain selection
+// ──────────────────────────────────────────
+function goBackToDomains() {
+    currentDomain = null;
+    currentQuestions = [];
+    showScreen('domain');
 }
 
 // Show Screen
@@ -298,9 +329,12 @@ function showScreen(screen) {
     domainScreen.classList.add('hidden');
     quizScreen.classList.add('hidden');
     resultScreen.classList.add('hidden');
+    rulebookScreen.classList.add('hidden');
     
     if (screen === 'domain') {
         domainScreen.classList.remove('hidden');
+    } else if (screen === 'rulebook') {
+        rulebookScreen.classList.remove('hidden');
     } else if (screen === 'quiz') {
         quizScreen.classList.remove('hidden');
     } else if (screen === 'result') {
@@ -435,13 +469,6 @@ function nextQuestion() {
 // Show Results
 function showResults() {
     showScreen('result');
-    
-    const domainNames = {
-        fullstack: 'Full Stack Development',
-        gamedev: 'Game Development',
-        uiux: 'UI/UX Design',
-        hacking: 'Ethical Hacking'
-    };
     
     document.getElementById('result-domain').textContent = domainNames[currentDomain];
     document.getElementById('final-score').textContent = score;

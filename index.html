@@ -49,6 +49,58 @@
             </div>
         </div>
 
+        <!-- Rule Book Screen -->
+        <div id="rulebook-screen" class="hidden">
+            <div id="rulebook-card">
+                <div id="rulebook-corner-tl">▛</div>
+                <div id="rulebook-corner-tr">▜</div>
+
+                <h2 id="rulebook-title">📜 RULES</h2>
+                <p id="rulebook-subtitle">READ BEFORE YOU PLAY</p>
+
+                <ul id="rulebook-list">
+                    <li>
+                        <span class="rb-icon">⏱</span>
+                        <span>Each question has a <strong>15-second</strong> time limit.</span>
+                    </li>
+                    <li>
+                        <span class="rb-icon">⚡</span>
+                        <span>Quiz <strong>auto-advances</strong> when the timer runs out.</span>
+                    </li>
+                    <li>
+                        <span class="rb-icon">1️⃣</span>
+                        <span>Only <strong>one question</strong> is shown at a time.</span>
+                    </li>
+                    <li>
+                        <span class="rb-icon">✅</span>
+                        <span>Each correct answer earns <strong>10 points</strong>.</span>
+                    </li>
+                    <li>
+                        <span class="rb-icon">🚫</span>
+                        <span><strong>No negative marking</strong> — wrong answers cost 0 points.</span>
+                    </li>
+                    <li>
+                        <span class="rb-icon">🏁</span>
+                        <span>Your <strong>final score</strong> is shown at the end of the quiz.</span>
+                    </li>
+                    <li>
+                        <span class="rb-icon">🔀</span>
+                        <span>Questions and options are <strong>shuffled</strong> every round.</span>
+                    </li>
+                </ul>
+
+                <div id="rulebook-domain-tag"></div>
+
+                <div id="rulebook-btns">
+                    <button id="rb-start-btn" onclick="startQuiz()">▶ START QUIZ</button>
+                    <button id="rb-back-btn" onclick="goBackToDomains()">◀ GO BACK</button>
+                </div>
+
+                <div id="rulebook-corner-bl">▙</div>
+                <div id="rulebook-corner-br">▟</div>
+            </div>
+        </div>
+
         <!-- Quiz Screen -->
         <div id="quiz-screen" class="hidden animate-slide-up" style="position: relative;">
             <!-- Exit button — anchored to top-right corner of quiz screen -->
@@ -154,6 +206,176 @@
     </div>
 
     <style>
+        /* ══════════════════════════════
+           RULE BOOK SCREEN
+        ══════════════════════════════ */
+        #rulebook-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #rulebook-screen.hidden { display: none; }
+
+        /* Entrance animation */
+        @keyframes rb-pop-in {
+            0%   { transform: scale(0.82); opacity: 0; }
+            65%  { transform: scale(1.04); opacity: 1; }
+            100% { transform: scale(1);   opacity: 1; }
+        }
+
+        #rulebook-card {
+            position: relative;
+            background: #fffbe6;
+            border: 6px solid #1a1a1a;
+            box-shadow: 10px 10px 0px #1a1a1a;
+            padding: 40px 44px 36px;
+            max-width: 560px;
+            width: 100%;
+            animation: rb-pop-in 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+        }
+
+        /* Corner decorations */
+        #rulebook-corner-tl,
+        #rulebook-corner-tr,
+        #rulebook-corner-bl,
+        #rulebook-corner-br {
+            position: absolute;
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #1a1a1a;
+            line-height: 1;
+            user-select: none;
+        }
+        #rulebook-corner-tl { top: 6px;  left: 8px;  }
+        #rulebook-corner-tr { top: 6px;  right: 8px; }
+        #rulebook-corner-bl { bottom: 6px; left: 8px;  }
+        #rulebook-corner-br { bottom: 6px; right: 8px; }
+
+        #rulebook-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(1.1rem, 3.5vw, 1.55rem);
+            color: #1a1a1a;
+            text-shadow: 4px 4px 0px #ffe600;
+            text-align: center;
+            margin-bottom: 6px;
+            letter-spacing: 2px;
+        }
+
+        #rulebook-subtitle {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.5rem;
+            color: #555;
+            text-align: center;
+            letter-spacing: 3px;
+            margin-bottom: 28px;
+        }
+
+        /* Divider line */
+        #rulebook-title::after {
+            content: '';
+            display: block;
+            height: 4px;
+            background: #1a1a1a;
+            margin: 14px auto 0;
+            width: 60px;
+            box-shadow: 2px 2px 0 #ffe600;
+        }
+
+        #rulebook-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #rulebook-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.48rem;
+            line-height: 1.75;
+            color: #1a1a1a;
+            background: #fff;
+            border: 3px solid #1a1a1a;
+            box-shadow: 3px 3px 0 #1a1a1a;
+            padding: 10px 14px;
+        }
+
+        #rulebook-list li strong {
+            color: #c00;
+        }
+
+        .rb-icon {
+            font-size: 1rem;
+            line-height: 1;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        #rulebook-domain-tag {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.5rem;
+            text-align: center;
+            color: #555;
+            letter-spacing: 2px;
+            margin-bottom: 22px;
+            text-transform: uppercase;
+        }
+        #rulebook-domain-tag:empty { display: none; }
+
+        #rulebook-btns {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        #rb-start-btn, #rb-back-btn {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.6rem;
+            border: 3px solid #1a1a1a;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            user-select: none;
+            letter-spacing: 1px;
+        }
+
+        #rb-start-btn {
+            background: #ffe600;
+            color: #1a1a1a;
+            box-shadow: 4px 4px 0px #1a1a1a;
+        }
+        #rb-start-btn:hover {
+            background: #1a1a1a;
+            color: #ffe600;
+            transform: scale(1.05) translateY(-1px);
+            box-shadow: 5px 5px 0px #ffe600;
+        }
+        #rb-start-btn:active {
+            transform: scale(0.97) translateY(1px);
+            box-shadow: 2px 2px 0px #1a1a1a;
+        }
+
+        #rb-back-btn {
+            background: #fff;
+            color: #1a1a1a;
+            box-shadow: 4px 4px 0px #1a1a1a;
+        }
+        #rb-back-btn:hover {
+            background: #1a1a1a;
+            color: #fff;
+            transform: scale(1.05) translateY(-1px);
+            box-shadow: 5px 5px 0px #555;
+        }
+        #rb-back-btn:active {
+            transform: scale(0.97) translateY(1px);
+            box-shadow: 2px 2px 0px #1a1a1a;
+        }
+
         /* ══════════════════════════════
            EXIT BUTTON
         ══════════════════════════════ */
