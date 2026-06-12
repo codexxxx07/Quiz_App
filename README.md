@@ -20,11 +20,14 @@ Quiz Application is a fully functional web-based quiz platform that combines lea
 
 ### Screenshots
 
-*(Screenshots folder coming soon - showing domain selection, quiz interface, and results screen)*
-
 - **Domain Selection:** Choose from 4 technical categories
+   ![Domain Selection](/assets/Img1.png)
 - **Quiz Interface:** Timed questions with multiple-choice answers
+   ![Quiz Interface](/assets/Img2.png)
+   ![Quiz Interface](/assets/Img3.png)
+   ![Quiz Interface](/assets/Img4.png)
 - **Results Screen:** Performance breakdown with high score tracking
+   ![Results Screen](/assets/Img5.png)
 
 ---
 
